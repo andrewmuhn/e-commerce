@@ -51,7 +51,19 @@ router.post('/', (req, res) => {
       stock: 3,
       tagIds: [1, 2, 3, 4]
     }
-  */
+  */ if (!req.body.product_name) {
+    res.status(400).json({ message: 'Missing "product_name" in request body' });
+    return;
+  }
+  if (!req.body.price) {
+    res.status(400).json({ message: 'Missing "price" in request body' });
+    return;
+  }
+  if (!req.body.stock) {
+    res.status(400).json({ message: 'Missing "stock" in request body' });
+    return;
+  }
+
   Product.create(req.body)
     .then((product) => {
       // if there's product tags, we need to create pairings to bulk create in the ProductTag model
@@ -65,9 +77,9 @@ router.post('/', (req, res) => {
         return ProductTag.bulkCreate(productTagIdArr);
       }
       // if no product tags, just respond
-      res.status(200).json(product);
+      res.status(201).json(product);
     })
-    .then((productTagIds) => res.status(200).json(productTagIds))
+    .then((productTagIds) => res.status(201).json(productTagIds))
     .catch((err) => {
       console.log(err);
       res.status(400).json(err);
@@ -121,9 +133,8 @@ router.delete('/:id', async (req, res) => {
   // delete one product by its `id` value
   try {
     const existingProduct = await Product.findByPk(req.params.id);
-    console.log(existingProduct);
     if (!existingProduct) {
-      res.status(400).json({ message: 'Product with that Id not found' });
+      res.status(404).json({ message: 'Product with that id not found' });
       return;
     }
     await existingProduct.destroy();

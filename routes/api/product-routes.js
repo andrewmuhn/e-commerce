@@ -83,6 +83,7 @@ router.put('/:id', (req, res) => {
     }
   })
     .then((product) => {
+      console.log(product);
       // find all associated tags from ProductTag
       return ProductTag.findAll({ where: { product_id: req.params.id } });
     })
@@ -116,8 +117,21 @@ router.put('/:id', (req, res) => {
     });
 });
 
-router.delete('/:id', (req, res) => {
+router.delete('/:id', async (req, res) => {
   // delete one product by its `id` value
+  try {
+    const existingProduct = await Product.findByPk(req.params.id);
+    console.log(existingProduct);
+    if (!existingProduct) {
+      res.status(400).json({ message: 'Product with that Id not found' });
+      return;
+    }
+    await existingProduct.destroy();
+    // await Product.destroy({ where: { product_id: req.params.id } });
+    res.status(200).json({ message: 'Product succesfully destroyed' });
+  } catch (err) {
+    res.json(500).json(err);
+  }
 });
 
 module.exports = router;

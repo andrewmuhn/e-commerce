@@ -95,7 +95,6 @@ router.put('/:id', (req, res) => {
     }
   })
     .then((product) => {
-      console.log(product);
       // find all associated tags from ProductTag
       return ProductTag.findAll({ where: { product_id: req.params.id } });
     })
@@ -103,6 +102,7 @@ router.put('/:id', (req, res) => {
       // get list of current tag_ids
       const productTagIds = productTags.map(({ tag_id }) => tag_id);
       // create filtered list of new tag_ids
+      console.log(productTagIds);
       const newProductTags = req.body.tagIds
         .filter((tag_id) => !productTagIds.includes(tag_id))
         .map((tag_id) => {
@@ -139,7 +139,7 @@ router.delete('/:id', async (req, res) => {
     }
     await existingProduct.destroy();
     // await Product.destroy({ where: { product_id: req.params.id } });
-    res.status(200).json({ message: 'Product succesfully destroyed' });
+    res.status(200).json({ message: 'Product succesfully deleted' });
   } catch (err) {
     res.json(500).json(err);
   }

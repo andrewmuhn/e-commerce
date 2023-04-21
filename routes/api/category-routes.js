@@ -36,9 +36,7 @@ router.get('/:id', async (req, res) => {
 router.post('/', async (req, res) => {
   // create a new category
   if (!req.body.category_name) {
-    res
-      .status(400)
-      .json({ message: 'Missing "category_name" in request body' });
+    res.status(400).json({ message: 'Missing category_name in request body' });
     return;
   }
   try {
@@ -49,8 +47,23 @@ router.post('/', async (req, res) => {
   }
 });
 
-router.put('/:id', (req, res) => {
+router.put('/:id', async (req, res) => {
   // update a category by its `id` value
+  if (!req.body.category_name) {
+    res.status(400).json({ message: 'Missing category_name in request body' });
+    return;
+  }
+  try {
+    const existingCategory = await Category.findByPk(req.params.id);
+    if (!existingCategory) {
+      res.status(404).json({ message: 'Category with that id not found' });
+      return;
+    }
+    await existingCategory.update(req.body);
+    res.status(200).json({ message: 'Category succesfully updated' });
+  } catch (err) {
+    res.json(500).json(err);
+  }
 });
 
 router.delete('/:id', async (req, res) => {

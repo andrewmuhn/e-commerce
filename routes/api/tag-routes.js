@@ -68,40 +68,41 @@ router.post('/', async (req, res) => {
 });
 
 router.put('/:id', async (req, res) => {
-  // update a tag's name by its `id` value
+  if (!req.body.tag_name) {
+    res.status(400).json({ message: 'Missing tag_name in request body' });
+    return;
+  }
   try {
-    await Tag.update(req.body, {
-      where: {
-        id: req.params.id
-      }
+    const existingTag = await Tag.findByPk(req.params.id);
+    if (!existingTag) {
+      res.status(404).json({ message: 'Tag with that id not found' });
+      return;
+    }
+    await existingTag.update(req.body);
+
+    // This is here to handle updating the associated Product Tags
+    const productTags = await ProductTag.findAll({
+      where: { tag_id: req.params.id }
     });
 
-    const products = await ProductTag.findAll({
-      where: { tags_id: req.params.id }
-    });
+    const ProductTagIds = productTags.map(({ product_id }) => product_id);
+    console.log(ProductTagIds);
+    const newProductTags = req.body.productIds
+      .filter((product_id) => !ProductTagIds.includes(product_id))
+      .map((product_id) => ({
+        tag_id: req.params.id,
+        product_id
+      }));
 
-    const taggedProductIds = products.map(({ product_id }) => product_id);
-    const newTags = req.body.productIds
-      .filter((product_id) => !taggedProductIds.includes(product_id))
-      .map((product_id) => {
-        return {
-          tag_id: req.params.id,
-          product_id
-        };
-      });
-    const taggedProductsToRemove = products
+    const productTagsToRemove = productTags
       .filter(({ product_id }) => !req.body.productIds.includes(product_id))
       .map(({ id }) => id);
 
-    await Promise.all([
-      ProductTag.destroy({ where: { id: taggedProductsToRemove } }),
-      ProductTag.bulkCreate(newTags)
+    const updatedProductTags = await Promise.all([
+      ProductTag.destroy({ where: { id: productTagsToRemove } }),
+      ProductTag.bulkCreate(newProductTags)
     ]);
-    const updatedTaggedProducts = await ProductTag.findAll({
-      where: { product_id: req.params.id }
-    });
-
-    res.json(updatedTaggedProducts);
+    res.status(200).json(updatedProductTags);
   } catch (err) {
     res.json(500).json(err);
   }
@@ -117,7 +118,7 @@ router.delete('/:id', async (req, res) => {
     }
 
     await existingTag.destroy();
-    res.status(200).json({ message: 'Tag succesfully destroyed' });
+    res.status(200).json({ message: 'Tag succesfully deleted' });
   } catch (err) {
     res.json(500).json(err);
   }

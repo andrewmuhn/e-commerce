@@ -46,6 +46,8 @@
 	npm run seed
 ```
 
+![Setup Gif](./Assets/ecommerce-setup.gif)
+
 ## Usage
 
 - Follow the above installation steps to get started.
@@ -55,9 +57,21 @@
 	npm start
 ```
 
+View all Categories, Products, and Tags
+![View](./Assets/ecommerce-get-all.gif)
+
+Create a Category, Product, and Tag
+![Create](./Assets/ecommerce-create.gif)
+
+Update a Category, Product, and Tag
+![Update](./Assets/ecommerce-update.gif)
+
+Delete a Category, Product, and Tag
+![Delete](./Assets/ecommerce-delete.gif)
+
 [Link to repo](https://github.com/andrewmuhn/e-commerce)
 
-[Link to video walkthrough of application]()
+[Link to video walkthrough of application](https://drive.google.com/file/d/1iHjpHM_3pMpDzXfi6_TGDGwU5bj0fqEB/view)
 
 ## Credits
 
